@@ -1,0 +1,3 @@
+rabbitmqctl list_connections
+
+rabbitmqctl list_channels

@@ -1,0 +1,182 @@
+{
+  "name": "rabbitmq_message_routing_errors",
+  "description": "RabbitMQ Message Routing Errors occur when RabbitMQ, a message broker software, fails to route messages from the sender to the intended recipient. This can happen due to various reasons such as network issues, misconfiguration, or issues with the software itself. As a result, messages may be delayed, lost, or delivered to the wrong recipient, leading to disruptions in communication and potentially impacting the functionality of the software system that relies on RabbitMQ.",
+  "params": [
+    {
+      "name": "ROUTING_KEY",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_PORT",
+      "value": ""
+    },
+    {
+      "name": "VIRTUAL_HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "EXCHANGE_NAME",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_HOST",
+      "value": ""
+    },
+    {
+      "name": "QUEUE_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## RabbitMQ Message Routing Errors\nRabbitMQ Message Routing Errors occur when RabbitMQ, a message broker software, fails to route messages from the sender to the intended recipient. This can happen due to various reasons such as network issues, misconfiguration, or issues with the software itself. As a result, messages may be delayed, lost, or delivered to the wrong recipient, leading to disruptions in communication and potentially impacting the functionality of the software system that relies on RabbitMQ."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that RabbitMQ is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status rabbitmq-server`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ logs for any errors"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `journalctl -u rabbitmq-server | tail -n 50`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the RabbitMQ exchange exists and is configured correctly"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqadmin -q list exchanges | grep ${EXCHANGE_NAME}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the RabbitMQ queue exists and is configured correctly"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqadmin -q list queues | grep ${QUEUE_NAME}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the RabbitMQ binding between the exchange and queue exists and is configured correctly"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqctl list_bindings | grep ${EXCHANGE_NAME} | grep ${QUEUE_NAME}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the RabbitMQ connections and channels"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_rmqctl_list_conn_channels()"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the RabbitMQ consumers"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqctl list_consumers`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the message is being sent to the correct exchange and routing key"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_rabbitmq_trace($ROUTING_KEY)"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ message rates for the exchange and queue"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqctl list_queues name messages_ready messages_unacknowledged`"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the RabbitMQ virtual host is configured correctly"
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rabbitmqctl list_vhosts | grep ${VIRTUAL_HOST_NAME}`"
+    },
+    {
+      "name": "cell_22",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if the exchange and queue bindings are correctly defined on the RabbitMQ server. If not, modify them to ensure proper routing of messages between the producers and consumers."
+    },
+    {
+      "name": "cell_23",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_update_rabbitmq_bindings($RABBITMQ_PORT, $EXCHANGE_NAME, $RABBITMQ_HOST, $QUEUE_NAME)"
+    }
+  ]
+}
